@@ -1,0 +1,6 @@
+[GLOBAL]
+local_config = 0
+custom_name = BridgeServer
+cmd_title = BS
+domain	= scs.mgxy.shangyoo
+port = {}

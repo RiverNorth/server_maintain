@@ -1,0 +1,172 @@
+from config import *
+from sftp import *
+import os
+
+def upload_config_file(server_config,remote_config):
+    #1.prepare server config file in tmp dir
+    prepare_config_file(server_config)
+    #2.init sftp client
+    client=Sftp(remote_config["ip_addr"],remote_config["sftp_user"],remote_config["sftp_password"])
+    if Sftp.OP_OK!=client.login():
+        return "upload config file error:Sftp user/password error"
+    
+    #3.read upload path
+    share_path=server_config["share_path"]
+    remote_path=server_config["remote_path"]
+    cwd_path=os.getcwd() 
+    #handle path that need link with another
+    if not share_path.endswith("/"):
+        share_path=share_path+"/"
+    if not remote_path.endswith("/"):
+        remote_path=remote_path+"/"
+    if not cwd_path.endswith("/"):
+        cwd_path=cwd_path+"/"   
+        
+    #4.upload file    
+    for local_path in up_load_bash_ini_dic.keys():
+        remote_share_path=share_path+up_load_bash_ini_dic[local_path]
+        remote_remote_path=remote_path+up_load_bash_ini_dic[local_path]
+        local_path=cwd_path+local_path.split("/",1)[1]
+        if Sftp.OP_OK!=client.upload_files(remote_share_path,local_path):
+            return client.error_str
+        if Sftp.OP_OK!=client.upload_files(remote_remote_path,local_path):
+            return client.error_str        
+    return False
+
+
+def prepare_config_file(server_config):
+    read_common_config(server_config)
+    read_bs_bash(server_config)
+    read_bs_ini(server_config)
+    read_dba_bash(server_config)
+    read_dba_ini(server_config)
+    read_gs_bash(server_config)
+    read_gs_ini(server_config)
+    read_ls_bash(server_config)
+    read_ls_ini(server_config)
+    read_scs_bash(server_config)
+    read_scs_ini(server_config)
+
+def read_common_config(server_config):
+    a=server_config
+    f=open(COMMON_CONFIG_FILE,"r")
+    string=f.read()
+    f.close()
+    new_string=string.format(a["dba_ip"],a["dba_listen_port"],\
+                             a["dba_telnet_port"],a["dbu_ip"],\
+                             a["dbu_listen_port"],a["dbu_telnet_port"],\
+                             a["scs_ip"],a["scs_listen_port"],\
+                             a["scs_telnet_port"],a["ls_ip_for_gs"],\
+                             a["ls_port_for_gs"],a["ls_ip_for_client"],\
+                             a["ls_port_for_client"],a["ls_telnet_ip"],\
+                             a["ls_telnet_port"],a["gs_ip"],\
+                             a["gs_listen_port"],a["gs_telnet_port"],\
+                             a["http_ip"],a["http_listen_port"],\
+                             a["bs_ip"],a["bs_listen_port"],\
+                             a["bs_telnet_ip"],a["bs_telnet_port"],\
+                             a["area_id"])
+    f=open(TMP_COMMON_CONFIG_FILE,"w")
+    f.write(new_string)
+    f.close()
+
+def read_gs_bash(server_config):
+    a=server_config
+    f=open(GS_BASH_FILE,"r")
+    string=f.read()
+    f.close()
+    
+    f=open(TMP_GS_BASH_FILE,"w")
+    f.write(string.format(a["gs_name"]))
+    f.close()    
+
+def read_gs_ini(server_config):
+    a=server_config
+    f=open(GS_INI_FILE,"r")
+    string=f.read()
+    f.close()
+    
+    f=open(TMP_GS_INI_FILE,"w")
+    f.write(string.format(a["scs_listen_port"]))
+    f.close()      
+
+def read_dba_bash(server_config):
+    a=server_config
+    f=open(DBA_BASH_FILE,"r")
+    string=f.read()
+    f.close()
+    
+    f=open(TMP_DBA_BASH_FILE,"w")
+    f.write(string.format(a["dba_name"]))
+    f.close()     
+
+def read_dba_ini(server_config):
+    a=server_config
+    f=open(DBA_INI_FILE,"r")
+    string=f.read()
+    f.close()
+    
+    f=open(TMP_DBA_INI_FILE,"w")
+    f.write(string.format(a["scs_listen_port"]))
+    f.close()       
+
+def read_bs_bash(server_config):
+    a=server_config
+    f=open(BS_BASH_FILE,"r")
+    string=f.read()
+    f.close()
+    
+    f=open(TMP_BS_BASH_FILE,"w")
+    f.write(string.format(a["bs_name"]))
+    f.close()     
+
+def read_bs_ini(server_config):
+    a=server_config
+    f=open(BS_INI_FILE,"r")
+    string=f.read()
+    f.close()
+    
+    f=open(TMP_BS_INI_FILE,"w")
+    f.write( string.format(a["scs_listen_port"]))
+    f.close()      
+
+def read_ls_bash(server_config):
+    a=server_config
+    f=open(LS_BASH_FILE,"r")
+    string=f.read()
+    f.close()
+    
+    f=open(TMP_LS_BASH_FILE,"w")
+    f.write( string.format(a["ls_name"]))
+    f.close()      
+
+def read_ls_ini(server_config):
+    a=server_config
+    f=open(LS_INI_FILE,"r")
+    string=f.read()
+    f.close()
+    
+    f=open(TMP_LS_INI_FILE,"w")
+    f.write( string.format(a["scs_listen_port"]))
+    f.close()      
+
+def read_scs_bash(server_config):
+    a=server_config
+    f=open(SCS_BASH_FILE,"r")
+    string=f.read()
+    f.close()
+    
+    f=open(TMP_SCS_BASH_FILE,"w")
+    f.write(string.format(a["scs_name"]))
+    f.close()     
+
+def read_scs_ini(server_config):
+    a=server_config
+    f=open(SCS_INI_FILE,"r")
+    string=f.read()
+    f.close()
+    
+    f=open(TMP_SCS_INI_FILE,"w")
+    f.write(string.format(a["scs_listen_port"]))
+    f.close()     
+
+    
